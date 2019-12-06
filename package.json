@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "restify": "^8.4.0",
-    "restify-errors": "^8.0.1"
+    "restify-errors": "^8.0.1",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.1"
