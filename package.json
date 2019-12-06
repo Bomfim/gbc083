@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
   "dependencies": {
     "restify": "^8.4.0",
     "restify-errors": "^8.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.1"
   }
 }
