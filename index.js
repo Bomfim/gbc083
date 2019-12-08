@@ -1,10 +1,13 @@
-const restify = require('restify');
-const errors = require('restify-errors');
-const controller = require('./articles.controller');
-const uuidv4 = require('uuid/v4');
-
+const restify = require('restify')
+const errors = require('restify-errors')
+const controllerArticles = require('./articles.controller')
+const controllerCrypto = require('./crypto.controller')
+const uuidv4 = require('uuid/v4')
+const fs = require('fs')
 
 const port = process.env.PORT || 3000;
+
+let isSigned = false;
 
 var server = restify.createServer({
   name: 'gbc083'
@@ -17,8 +20,31 @@ server.pre((req, res, next) => {
   return next();
 });
 
+server.post('/api/signin', (req, res, next) => {
+  controllerCrypto.generateRSAPairKeys();
+
+  if (!req.body) {
+    return next(new errors.BadRequestError());
+  }
+  res.send(200, {
+    public_key: controllerCrypto.getPublicKey(),
+    secret: controllerCrypto.encryptRSA(req.body)
+  });
+  this.isSigned = true;
+  return next();
+});
+
+server.get('/', (req, res, next) => {
+  res.send(200, "API up and running...");
+  return next();
+});
+
 server.get('/api/articles', (req, res, next) => {
-  res.send(200, controller.getAll());
+  if (this.isSigned) {
+    res.send(200, controllerCrypto.encryptAES(controllerArticles.getAll()));
+  } else {
+    res.send(200, controllerArticles.getAll());
+  }
   return next();
 });
 
@@ -27,7 +53,7 @@ server.get('/api/articles/:id', (req, res, next) => {
     return next(new errors.BadRequestError());
   }
   try {
-    const article = controller.getById(req.params.id);
+    const article = controllerArticles.getById(req.params.id);
     res.send(200, article);
     return next();
   } catch (error) {
@@ -39,7 +65,7 @@ server.post('/api/articles', (req, res, next) => {
   if (!req.body || !req.body.name || !req.body.description || !req.body.author) {
     return next(new errors.BadRequestError());
   }
-  controller.create(uuidv4(), req.body.name, req.body.description, req.body.author);
+  controllerArticles.create(uuidv4(), req.body.name, req.body.description, req.body.author);
   res.send(201);
   return next();
 });
@@ -49,7 +75,7 @@ server.put('/api/articles/:id', (req, res, next) => {
     return next(new errors.BadRequestError());
   }
   try {
-    const article = controller.update(req.params.id, req.body.name, req.body.description, req.body.author);
+    const article = controllerArticles.update(req.params.id, req.body.name, req.body.description, req.body.author);
     res.send(200, article);
     return next();
   } catch (error) {
@@ -62,7 +88,7 @@ server.del('/api/articles/:id', (req, res, next) => {
     return next(new errors.BadRequestError());
   }
   try {
-    controller.del(req.params.id);
+    controllerArticles.del(req.params.id);
     res.send(204);
     return next();
   } catch (error) {
