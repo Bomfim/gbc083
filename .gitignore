@@ -63,3 +63,5 @@ typings/
 .vscode
 
 private.pem
+client_private.pem
+client_public.pem
