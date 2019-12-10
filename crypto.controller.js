@@ -58,11 +58,21 @@ class CryptoController {
         return decrypted.toString('utf8')
     }
 
+    decryptRSA(toDecrypt, publicKey) {
+        const buffer = Buffer.from(toDecrypt, 'base64')
+        const decrypted = crypto.privateDecrypt({
+                key: publicKey,
+                passphrase: '',
+            },
+            buffer,
+        )
+        return decrypted.toString('utf8')
+    }
+
     encryptAES(text) {
         const cipher = crypto.createCipher('aes-256-cbc', this._password);
         let encrypted = cipher.update(JSON.stringify(text), 'utf8', 'hex');
         encrypted += cipher.final('hex');
-        this.decryptAES(encrypted);
         return encrypted;
     }
 
@@ -74,8 +84,12 @@ class CryptoController {
     }
 
     verifyIntegrity(text) {
-        const hash = crypto.createHmac('sha256', this._password).update(text).digest('hex');
+        const hash = crypto.createHash('sha1').update(JSON.stringify(text)).digest('hex');
         return hash;
+    }
+
+    verifySignature(text, publicKey) {
+        this.decryptRSA(text, publicKey);
     }
 }
 

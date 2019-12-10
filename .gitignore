@@ -62,4 +62,4 @@ typings/
 
 .vscode
 
-*.pem
+private.pem
