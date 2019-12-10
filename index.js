@@ -89,7 +89,7 @@ server.post('/api/articles', (req, res, next) => {
     return next(new errors.BadRequestError());
   }
   if (isSigned) {
-    const decrypted = JSON.parse(controllerCrypto.decryptAES(req.body));
+    const decrypted = controllerCrypto.decryptAES(req.body);
     if (controllerCrypto.verifyIntegrity({
         name: decrypted.name,
         description: decrypted.description,
@@ -113,7 +113,7 @@ server.put('/api/articles/:id', (req, res, next) => {
   try {
     let article;
     if (isSigned) {
-      const decrypted = JSON.parse(controllerCrypto.decryptAES(req.body));
+      const decrypted = controllerCrypto.decryptAES(req.body);
       article = controllerArticles.update(req.params.id, decrypted.name, decrypted.description, decrypted.author);
     } else {
       article = controllerArticles.update(req.params.id, req.body.name, req.body.description, req.body.author);

@@ -80,7 +80,7 @@ class CryptoController {
         const decipher = crypto.createDecipher('aes-256-cbc', this._password);
         let decrypted = decipher.update(text, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
-        return decrypted;
+        return JSON.parse(decrypted);
     }
 
     verifyIntegrity(text) {
