@@ -3,7 +3,7 @@ const errors = require('restify-errors')
 const controllerArticles = require('./articles.controller')
 const controllerCrypto = require('./crypto.controller')
 const uuidv4 = require('uuid/v4')
-const fs = require('fs')
+const corsMiddleware = require('restify-cors-middleware');
 
 const port = process.env.PORT || 3000;
 
@@ -13,7 +13,16 @@ var server = restify.createServer({
   name: 'gbc083'
 });
 
+const cors = corsMiddleware({
+  origins: ['*'],
+  allowHeaders: ['X-App-Version'],
+  exposeHeaders: []
+});
+
 server.use(restify.plugins.bodyParser());
+
+server.pre(cors.preflight);
+server.use(cors.actual);
 
 server.pre((req, res, next) => {
   console.info(`${req.method} - ${req.url}`);
