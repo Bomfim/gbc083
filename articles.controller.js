@@ -19,21 +19,25 @@ class ArticlesController {
         return this._findArticleById(id);
     }
 
-    create(id, name, description, author) {
+    create(id, name, description, author, checksum, signature) {
         const newArticle = {
             id: id,
             name: name,
             description: description,
-            author: author
+            author: author,
+            checksum: checksum,
+            signature: signature
         };
         this._storage.push(newArticle);
     }
 
-    update(id, name, description, author) {
+    update(id, name, description, author, checksum, signature) {
         const foundArticle = this._findArticleById(id);
         foundArticle.name = name;
         foundArticle.description = description;
         foundArticle.author = author;
+        foundArticle.checksum = checksum;
+        foundArticle.signature = signature;
         return foundArticle;
     }
 

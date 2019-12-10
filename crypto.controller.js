@@ -60,8 +60,8 @@ class CryptoController {
 
     decryptRSA(toDecrypt, publicKey) {
         const buffer = Buffer.from(toDecrypt, 'base64')
-        const decrypted = crypto.privateDecrypt({
-                key: publicKey,
+        const decrypted = crypto.publicDecrypt({
+                key: publicKey.toString(),
                 passphrase: '',
             },
             buffer,
@@ -89,7 +89,8 @@ class CryptoController {
     }
 
     verifySignature(text, publicKey) {
-        this.decryptRSA(text, publicKey);
+        const decrypted = this.decryptRSA(text, publicKey);
+        console.info(decrypted);
     }
 }
 
