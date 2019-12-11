@@ -61,9 +61,15 @@ server.get('/', (req, res, next) => {
 
 server.get('/api/articles', (req, res, next) => {
   if (isEncrypted) {
-    res.send(200, controllerCrypto.encryptAES(controllerArticles.getAll()));
+    res.send(200, {
+      data: controllerCrypto.encryptAES(controllerArticles.getAll()),
+      checksum: controllerCrypto.verifyIntegrity(controllerArticles.getAll())
+    });
   } else {
-    res.send(200, controllerArticles.getAll());
+    res.send(200, {
+      data: controllerArticles.getAll(),
+      checksum: controllerCrypto.verifyIntegrity(controllerArticles.getAll())
+    });
   }
   return next();
 });
