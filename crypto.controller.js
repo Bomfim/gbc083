@@ -45,6 +45,17 @@ class CryptoController {
         return encrypted.toString('base64');
     }
 
+    encryptRSAPrivate(toEncrypt) {
+        const absolutePath = path.resolve('private.pem');
+        const privateKey = fs.readFileSync(absolutePath, 'utf8');
+        const buffer = Buffer.from(toEncrypt, 'utf8');
+        const encrypted = crypto.privateEncrypt({
+            key: privateKey,
+            passphrase: ''
+        }, buffer);
+        return encrypted.toString('base64');
+    }
+
     decryptRSA(toDecrypt) {
         const absolutePath = path.resolve('private.pem')
         const privateKey = fs.readFileSync(absolutePath, 'utf8')
