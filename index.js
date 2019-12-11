@@ -63,7 +63,7 @@ server.get('/api/articles', (req, res, next) => {
   if (isEncrypted) {
     res.send(200, controllerCrypto.encryptAES({
       data: controllerArticles.getAll(),
-      checksum: controllerCrypto.encryptRSAPrivate(controllerCrypto.verifyIntegrity(controllerArticles.getAll()))
+      checksum: controllerCrypto.verifyIntegrity(controllerArticles.getAll())
     }));
   } else {
     res.send(200, {
