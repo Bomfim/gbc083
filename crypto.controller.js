@@ -60,13 +60,17 @@ class CryptoController {
 
     decryptRSA(toDecrypt, publicKey) {
         const buffer = Buffer.from(toDecrypt, 'base64')
-        const decrypted = crypto.publicDecrypt({
-                key: publicKey.toString(),
-                passphrase: '',
-            },
-            buffer,
-        )
-        return decrypted.toString('utf8')
+        try {
+            const decrypted = crypto.publicDecrypt({
+                    key: publicKey.toString(),
+                    passphrase: '',
+                },
+                buffer,
+            )
+            return decrypted.toString('utf8');
+        } catch (error) {
+            return error;
+        }
     }
 
     encryptAES(text) {

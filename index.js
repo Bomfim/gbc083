@@ -96,31 +96,27 @@ server.post('/api/articles', (req, res, next) => {
   if (isEncrypted) {
     const decrypted = controllerCrypto.decryptAES(req.body);
 
-    if (controllerCrypto.verifyIntegrity({ // Está íntegro?
+    const checksum = controllerCrypto.decryptRSA(decrypted.checksum, clientPublicKey);
+
+    if (checksum == controllerCrypto.verifyIntegrity({ // Está íntegro?
         name: decrypted.name,
         description: decrypted.description,
         author: decrypted.author
-      }) == decrypted.checksum.toLowerCase()) {
-
+      })) {
       isHealthy = true;
-
-      if (controllerCrypto.decryptRSA(decrypted.signature, clientPublicKey) == decrypted.checksum) { //Está autenticado?
-        isAuthenticated = true;
-      } else {
-        isAuthenticated = false;
-      }
-      controllerArticles.create(uuidv4(), decrypted.name, decrypted.description, decrypted.author, decrypted.checksum, decrypted.signature);
+      isAuthenticated = true;
+      controllerArticles.create(uuidv4(), decrypted.name, decrypted.description, decrypted.author, decrypted.checksum);
       res.send(201, {
         healthy: isHealthy,
         authenticated: isAuthenticated
       });
-
     } else {
       isHealthy = false;
-      res.send(500);
+      isAuthenticated = false;
+      return next(new errors.UnauthorizedError());
     }
   } else {
-    controllerArticles.create(uuidv4(), req.body.name, req.body.description, req.body.author, req.body.checksum, req.body.signature);
+    controllerArticles.create(uuidv4(), req.body.name, req.body.description, req.body.author, req.body.checksum);
     res.send(201, {
       healthy: isHealthy,
       authenticated: isAuthenticated
@@ -137,9 +133,9 @@ server.put('/api/articles/:id', (req, res, next) => {
     let article;
     if (isEncrypted) {
       const decrypted = controllerCrypto.decryptAES(req.body);
-      article = controllerArticles.update(req.params.id, decrypted.name, decrypted.description, decrypted.author, decrypted.checksum, decrypted.signature);
+      article = controllerArticles.update(req.params.id, decrypted.name, decrypted.description, decrypted.author, decrypted.checksum);
     } else {
-      article = controllerArticles.update(req.params.id, req.body.name, req.body.description, req.body.author, req.body.checksum, req.body.signature);
+      article = controllerArticles.update(req.params.id, req.body.name, req.body.description, req.body.author, req.body.checksum);
     }
     res.send(200, article);
     return next();
