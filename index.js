@@ -137,13 +137,32 @@ server.put('/api/articles/:id', (req, res, next) => {
   }
   try {
     let article;
-    if (isEncrypted) {
+    if (isEncrypted) { // Está cifrado?
       const decrypted = controllerCrypto.decryptAES(req.body);
-      article = controllerArticles.update(req.params.id, decrypted.name, decrypted.description, decrypted.author, decrypted.checksum);
+
+      const checksum = controllerCrypto.decryptRSA(decrypted.checksum, clientPublicKey); // Está autenticado?
+      if (checksum == controllerCrypto.verifyIntegrity({ // Está íntegro?
+          name: decrypted.name,
+          description: decrypted.description,
+          author: decrypted.author
+        })) {
+        isHealthy = true;
+        isAuthenticated = true;
+        article = controllerArticles.update(req.params.id, decrypted.name, decrypted.description, decrypted.author, decrypted.checksum);
+        res.send(200, {
+          healthy: isHealthy,
+          authenticated: isAuthenticated
+        });
+      } else {
+        isHealthy = false;
+        isAuthenticated = false;
+        return next(new errors.UnauthorizedError());
+      }
+
     } else {
       article = controllerArticles.update(req.params.id, req.body.name, req.body.description, req.body.author, req.body.checksum);
+      res.send(200, article);
     }
-    res.send(200, article);
     return next();
   } catch (error) {
     return next(new errors.NotFoundError(error));
