@@ -96,7 +96,7 @@ server.post('/api/articles', (req, res, next) => {
   if (isEncrypted) {
     const decrypted = controllerCrypto.decryptAES(req.body);
 
-    const checksum = controllerCrypto.decryptRSA(decrypted.checksum, clientPublicKey);
+    const checksum = controllerCrypto.decryptRSA(decrypted.checksum, clientPublicKey); // Está autenticado?
 
     if (checksum == controllerCrypto.verifyIntegrity({ // Está íntegro?
         name: decrypted.name,
